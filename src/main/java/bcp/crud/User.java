@@ -1,51 +1,48 @@
 package bcp.crud;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 public class User {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
-    
-    @NotBlank(message = "Name is mandatory")
     private String name;
-    
-    @NotBlank(message = "Email is mandatory")
     private String email;
 
     private Date dateOne;
-
     private java.sql.Date dateTwo;
-
     private LocalDate dateThree;
-
     private LocalDateTime dateFour;
+    private ZonedDateTime dateFive;
 
-    public User() {}
-
+    public User() {
+    }
 
     public void setId(long id) {
         this.id = id;
     }
-    
+
     public long getId() {
         return id;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -90,24 +87,41 @@ public class User {
         this.dateFour = dateFour;
     }
 
-    public User(long id, String name,
-            String email,
-            Date dateOne, java.sql.Date dateTwo,
-            LocalDate dateThree,
-            LocalDateTime dateFour) {
-        this.id = id;
+    public User(String name, String email, Date dateOne, java.sql.Date dateTwo, LocalDate dateThree,
+            LocalDateTime dateFour, ZonedDateTime dateFive) {
         this.name = name;
         this.email = email;
         this.dateOne = dateOne;
         this.dateTwo = dateTwo;
         this.dateThree = dateThree;
         this.dateFour = dateFour;
+        this.dateFive = dateFive;
     }
 
     @Override
     public String toString() {
-        return "User [dateFour=" + dateFour + ", dateOne=" + dateOne + ", dateThree=" + dateThree + ", dateTwo="
-                + dateTwo + ", email=" + email + ", id=" + id + ", name=" + name + "]";
+        String pattern = "yyyy-MM-dd HH:mm:ss";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(pattern);
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
+
+        return "\nUser [id=" + id + 
+                "\n, name=" + name +
+                "\n, email=" + email + 
+                "\n, dateOne....(java.util.Date)..........." + simpleDateFormat.format(dateOne) + " [" + dateOne + "]" + 
+                "\n, dateTwo....(java.sql.Date)............" + simpleDateFormat.format(dateTwo) + " [" + dateTwo + "]" +
+                "\n, dateThree..(java.time.LocalDate)......" + dateFormatter.format(dateThree) + "          [" + dateThree + "]" +
+                "\n, dateFour...(java.time.LocalDateTime).." + dateTimeFormatter.format(dateFour) + " [" + dateFour + "]" +
+                "\n, dateFive...(java.time.ZonedDateTime).." + dateTimeFormatter.format(dateFive) + " [" + dateFive + "]" +
+                "\n  {Default TZ" + TimeZone.getDefault()  + "} ]";
+    }
+
+    public ZonedDateTime getDateFive() {
+        return dateFive;
+    }
+
+    public void setDateFive(ZonedDateTime dateFive) {
+        this.dateFive = dateFive;
     }
 
 }

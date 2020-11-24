@@ -1,79 +1,74 @@
 package bcp.crud;
 
-import javax.validation.Valid;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@Controller
+@RestController
 public class UserController {
 
-    private final UserRepository userRepository;
-
+    private Logger log = LoggerFactory.getLogger(UserController.class);
+ 
     @Autowired
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private UserRepository userRepository;    
 
-    @GetMapping("/index")
-    public String index(Model model) {
-        Iterable<User> list = userRepository.findAll();
-        model.addAttribute("users", list.iterator().hasNext() ? list : null);
-        return "index";
-    }
+    @GetMapping("/users")
+	public List<User> retrieveAllUsers() {
+		return userRepository.findAll();
+	}
 
-    @GetMapping("/")
-    public String home(Model model) {
-        Iterable<User> list = userRepository.findAll();
-        model.addAttribute("users", list.iterator().hasNext() ? list : null);
-        return "index";
-    }
+	@GetMapping("/users/{id}")
+	public User retrieveUser(@PathVariable long id) {
+		Optional<User> user = userRepository.findById(id);
 
-    @GetMapping("/signup")
-    public String showSignUpForm(User user) {
-        return "add-user";
-    }
+		if (!user.isPresent())
+			throw new UserNotFoundException("id-" + id);
 
-    @PostMapping("/adduser")
-    public String addUser(@Valid User user, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            return "add-user";
-        }
-        userRepository.save(user);
-        return "redirect:/index";
-    }
+        log.info("Retrieve user: {}", user.get());
+		return user.get();
+	}
 
-    @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        model.addAttribute("user", user);
-        return "update-user";
-    }
+	@DeleteMapping("/users/{id}")
+	public void deleteUser(@PathVariable long id) {
+		userRepository.deleteById(id);
+	}
 
-    @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable("id") long id, @Valid User user, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            user.setId(id);
-            return "update-user";
-        }
+	@PostMapping("/users")
+	public ResponseEntity<Object> createUser(@RequestBody User user) {
+        log.info("Create user: {}", user);
+        User savedUser = userRepository.save(user);
 
-        userRepository.save(user);
-        model.addAttribute("users", userRepository.findAll());
-        return "redirect:/index";
-    }
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+				.buildAndExpand(savedUser.getId()).toUri();
 
-    @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable("id") long id, Model model) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
-        userRepository.delete(user);
-        model.addAttribute("users", userRepository.findAll());
-        return "index";
-    }
+		return ResponseEntity.created(location).build();
+	}
+	
+	@PutMapping("/users/{id}")
+	public ResponseEntity<Object> updateUser(@RequestBody User user, @PathVariable long id) {
+		Optional<User> userOptional = userRepository.findById(id);
+
+		if (!userOptional.isPresent())
+			return ResponseEntity.notFound().build();
+
+		user.setId(id);
+		userRepository.save(user);
+
+		return ResponseEntity.noContent().build();
+	}
+    
 }
