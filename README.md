@@ -27,3 +27,8 @@ User [id=0
   {Default TZsun.util.calendar.ZoneInfo[id="America/Sao_Paulo",offset=-10800000,dstSavings=0,useDaylight=false,transitions=93,lastRule=null]} ]
 
 ```
+
+# Links
+
+* https://www.baeldung.com/java-8-date-time-intro
+* https://www.springboottutorial.com/spring-boot-crud-rest-service-with-jpa-hibernate
