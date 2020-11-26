@@ -9,7 +9,7 @@
 ```
 curl    --header "Content-Type: application/json" \
         --request POST \
-        --data '{"name": "bbb","email": "abc@email.com","dateOne": "2020-07-28","dateTwo": "2020-07-28","dateThree": "2020-07-28","dateFour": "2020-07-28T21:45:08","dateFive": "2020-07-28T21:45:08.969752-03:00[America/Sao_Paulo]"}' \
+        --data '{"name": "bbb","email": "abc@email.com","dateOne": "2020-07-28","dateTwo": "2020-07-28","dateThree": "2020-07-28","dateFour": "2020-07-28T21:45:08","dateFive": "2020-07-28T21:45:08.969752-02:00"}' \
         http://localhost:8080/users
 ```
 
@@ -32,3 +32,13 @@ User [id=0
 
 * https://www.baeldung.com/java-8-date-time-intro
 * https://www.springboottutorial.com/spring-boot-crud-rest-service-with-jpa-hibernate
+
+# Info
+
+If ```spring.jackson.time-zone=GMT-3``` not informed, TZ data types will be threated as UTC:
+* java.util.Date (1)
+* java.sql.Date (1)
+* java.time.ZonedDateTime (2)
+
+*(1) Will receive as UTC and display (convert) in JVM TZ*  
+*(2) Will convert received TZ to UTC*
